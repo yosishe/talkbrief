@@ -114,17 +114,17 @@ def run_transcript(rd: RunDir, meta: dict, cfg: RunConfig) -> dict:
         segments, source, lang = [], "none", None
 
     prov.pop("file", None)
-    doc = {
+    cov = coverage_report(segments, meta.get("duration_s") or 0.0)
+    doc: dict = {
         "schema_version": 1,
         "language": lang,
         "source": source,
         "provenance": prov,
         "segments": segments,
-        "coverage": coverage_report(segments, meta.get("duration_s") or 0.0),
+        "coverage": cov,
     }
     validate("transcript", doc)
     write_json(rd.transcript_path, doc)
-    cov = doc["coverage"]
     log.info(
         "transcript: %s (%s), %d segments, %.0f%% of minutes spoken",
         source, prov["kind"], len(segments), cov["spoken_fraction"] * 100,

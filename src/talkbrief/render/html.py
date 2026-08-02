@@ -86,6 +86,13 @@ def _transcript_lines(segments: list[dict], lo: float, hi: float) -> list[dict]:
     return lines
 
 
+def _spans_label(on_screen: list[dict], max_shown: int = 3) -> str:
+    labels = [f"{hms(sp['start_s'])}–{hms(sp['end_s'])}" for sp in on_screen]
+    if len(labels) > max_shown:
+        labels = labels[:max_shown] + [f"+{len(labels) - max_shown}"]
+    return ", ".join(labels)
+
+
 def _chip(point: dict, video_id: str) -> dict:
     quote = point.get("quote")
     t = point.get("t")
@@ -137,9 +144,7 @@ def render_report(rd: RunDir, meta: dict, cfg: RunConfig) -> Path:
             "significance": entry.get("significance") or "",
             "not_said_aloud": entry.get("not_said_aloud"),
             "points": [_chip(p, vid) for p in entry.get("speaker_points", [])],
-            "spans": ", ".join(
-                f"{hms(sp['start_s'])}–{hms(sp['end_s'])}" for sp in fact["on_screen"]
-            ),
+            "spans": _spans_label(fact["on_screen"]),
             "times_returned": fact["times_returned"],
             "watch_url": f"https://youtu.be/{vid}?t={int(fact['first_seen_s'])}",
             "first_seen_hms": fact["hms"],

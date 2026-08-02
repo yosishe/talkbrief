@@ -64,6 +64,7 @@ def _stage(rd: RunDir, cfg: RunConfig, name: str, fn: Callable[[], object]) -> N
         rd.mark(name, "failed", seconds=time.monotonic() - t0, error=str(e))
         raise
     rd.mark(name, "done", seconds=time.monotonic() - t0, config_hash=cfg.stage_hash(name))
+    rd.invalidate_downstream(name)
 
 
 def run_url(url: str, cfg: RunConfig, backend: LLMBackend) -> RunDir:
@@ -79,6 +80,7 @@ def run_url(url: str, cfg: RunConfig, backend: LLMBackend) -> RunDir:
         rd.init_manifest(url, meta["id"], cfg, tool_versions())
         rd.mark("fetch", "done", seconds=time.monotonic() - t0,
                 config_hash=cfg.stage_hash("fetch"))
+        rd.invalidate_downstream("fetch")
     else:
         meta = read_json(rd.meta_path)
         rd.init_manifest(url, meta["id"], cfg, tool_versions())

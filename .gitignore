@@ -12,3 +12,4 @@ venv/
 talkbrief-runs/
 runs/
 tests/_tmp/
+.claude/

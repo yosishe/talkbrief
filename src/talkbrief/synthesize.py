@@ -19,7 +19,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 from .config import RunConfig
-from .llm import LLMBackend, LLMRequest
+from .llm import LLMBackend, LLMRequest, LLMResult
 from .rundir import RunDir
 from .schemas import MAP_OUTPUT, REDUCE_OUTPUT, validate
 from .util import hms, read_json, write_json
@@ -221,7 +221,7 @@ def run_synthesize(rd: RunDir, meta: dict, cfg: RunConfig, backend: LLMBackend) 
         for w in windows
     )
 
-    def do_map(window: dict) -> tuple[str, dict]:
+    def do_map(window: dict) -> tuple[str, LLMResult]:
         prompt, images = build_map_prompt(
             window, slides_by_id, segments, meta, outline, routing, cfg.lang
         )

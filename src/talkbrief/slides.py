@@ -79,9 +79,9 @@ def _dist_many(one: np.ndarray, many: list[np.ndarray]) -> np.ndarray:
 @dataclass
 class Candidate:
     rep_i: int  # representative sample index
+    bits: np.ndarray  # the representative frame's dhash
     spans: list[list[int]] = field(default_factory=list)  # inclusive sample-index spans
     source: str = "hash"
-    bits: np.ndarray | None = None
 
     def covered(self, i: int) -> bool:
         return any(s <= i <= e for s, e in self.spans)

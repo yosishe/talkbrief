@@ -46,4 +46,22 @@ prerequisite surfaced by `talkbrief doctor`, not a code path we can fix. The
 surface is small and stable, and the beauty budget goes into the HTML report, not the
 terminal. Zero-dep argparse it is.
 
+## D-005 — First real run findings (Karpathy, 2026-08-03)
+
+**2026-08-03.** `--only fetch,slides,transcript,align` on zjkBMFhNj_g (59.8 min):
+46 slides kept (51 hash + 0 floor; 5 build-collapsed once Apple Vision OCR replaced
+tesseract — the collapse pass needs decent OCR to see containment), 1,704 caption
+segments at 100% coverage, 21 windows following the video's own chapters. Full
+fake-backend render: 8.0 MB single file — inside the predicted 5–9 MB envelope.
+
+Two decisions from what the run showed:
+1. **Span labels cap at 3 (+N).** A near-blank "Demo" slide legitimately collects 13
+   return-spans (blank frames match each other); the data stays complete in
+   slides.json, only the display truncates. No "smart" blank-frame filtering — that
+   is the motion-mask class of cleverness this project explicitly avoids.
+2. **Visual QA path = headless Chrome screenshots**, not the IDE browser pane: the
+   pane mis-captures after programmatic scroll on the 8 MB page (page geometry
+   verified healthy via DOM measurements). Recorded so nobody "fixes" the CSS for a
+   capture artifact.
+
 <!-- APPEND BELOW — do not delete this line -->

@@ -70,7 +70,9 @@ markers = [
 addopts = "-m 'not network and not llm'"
 
 [tool.mypy]
-python_version = "3.11"
+# analysis version only (numpy's stubs need ≥3.12 `type` statements);
+# runtime 3.11 compatibility is enforced by the CI test matrix
+python_version = "3.12"
 ignore_missing_imports = true
 no_implicit_optional = true
 warn_unused_ignores = false

@@ -33,7 +33,8 @@ def _split_points(segments: list[dict], lo: float, hi: float, parts: int) -> lis
     total = sum(len(s["text"].split()) for s in inside)
     if total == 0 or parts <= 1:
         return []
-    cuts, acc, next_cut = [], 0, total / parts
+    cuts: list[float] = []
+    acc, next_cut = 0, total / parts
     for s in inside:
         acc += len(s["text"].split())
         if acc >= next_cut and len(cuts) < parts - 1:

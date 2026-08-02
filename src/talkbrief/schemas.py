@@ -287,7 +287,7 @@ VERIFIED = {
         "schema_version", "lang", "video", "overview", "slides", "windows",
         "model", "verification",
     ],
-    "properties": dict(DIGEST["properties"])
+    "properties": dict(DIGEST["properties"])  # type: ignore[arg-type,call-overload]
     | {
         "verification": {
             "type": "object",

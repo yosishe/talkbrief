@@ -159,3 +159,18 @@ class RunDir:
         if not rec or rec.get("status") != "done":
             return True
         return rec.get("config_hash") != cfg.stage_hash(stage)
+
+    def invalidate_downstream(self, stage: str) -> None:
+        """A stage that re-ran makes every LATER stage's artifacts stale — config
+        hashes alone can't see upstream-data changes."""
+        manifest = self.load_manifest()
+        stages = manifest.get("stages", {})
+        idx = STAGES.index(stage) + 1 if stage in STAGES else len(STAGES)
+        changed = False
+        for later in STAGES[idx:]:
+            rec = stages.get(later)
+            if rec and rec.get("status") == "done":
+                rec["status"] = "stale"
+                changed = True
+        if changed:
+            write_json(self.manifest_path, manifest)
