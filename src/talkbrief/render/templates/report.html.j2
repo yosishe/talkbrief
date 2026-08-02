@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ video.title }} — talkbrief</title>
+<style>
+  :root {
+    --bg: #faf9f6; --card: #ffffff; --ink: #1d1f24; --muted: #6b6f76;
+    --line: #e5e2da; --accent: #0f766e; --accent-soft: #e5f2f0;
+    --chip-bg: #fdf3d7; --chip-line: #eeddab; --warn: #b45309; --warn-bg: #fbeee1;
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px -12px rgba(20,22,26,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --card: #1c1f26; --ink: #e8e6e1; --muted: #9aa0a8;
+      --line: #2a2e37; --accent: #3fc9ad; --accent-soft: #17322d;
+      --chip-bg: #322d1c; --chip-line: #4a4227; --warn: #e19b50; --warn-bg: #3a2c1c;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #faf9f6; --card: #ffffff; --ink: #1d1f24; --muted: #6b6f76;
+    --line: #e5e2da; --accent: #0f766e; --accent-soft: #e5f2f0;
+    --chip-bg: #fdf3d7; --chip-line: #eeddab; --warn: #b45309; --warn-bg: #fbeee1;
+    --shadow: 0 1px 2px rgba(20,22,26,.06), 0 8px 24px -12px rgba(20,22,26,.12);
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a; --card: #1c1f26; --ink: #e8e6e1; --muted: #9aa0a8;
+    --line: #2a2e37; --accent: #3fc9ad; --accent-soft: #17322d;
+    --chip-bg: #322d1c; --chip-line: #4a4227; --warn: #e19b50; --warn-bg: #3a2c1c;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, "Noto Sans Hebrew", sans-serif;
+    text-align: start;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    direction: ltr; unicode-bidi: isolate;
+    background: color-mix(in srgb, var(--line) 45%, transparent);
+    padding: .05em .35em; border-radius: 5px; font-size: .92em;
+  }
+  th code { background: transparent; color: inherit; }
+  bdi { unicode-bidi: isolate; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 30;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-block-end: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1200px; margin-inline: auto; padding: .6rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .topbar h1 { font-size: 1rem; margin: 0; font-weight: 650; flex: 1 1 20ch; min-width: 0; }
+  .topbar h1 a { color: inherit; }
+  .top-meta { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .35em;
+    background: var(--accent-soft); color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 999px; padding: .15em .7em; font-size: .78rem; font-weight: 600;
+    white-space: nowrap;
+  }
+  .theme-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 8px; padding: .25em .6em; cursor: pointer; font-size: .85rem;
+  }
+
+  /* ---------- layout ---------- */
+  .layout {
+    max-width: 1200px; margin-inline: auto; padding: 1.5rem 1.25rem 4rem;
+    display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 2.2rem;
+    align-items: start;
+  }
+  .rail { position: sticky; top: 4.2rem; max-height: calc(100vh - 5.5rem); overflow-y: auto;
+    padding-inline-end: .4rem; font-size: .86rem; }
+  .rail h2 { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 1.1rem 0 .4rem; }
+  .rail a { display: block; color: var(--ink); padding: .18rem .5rem; border-radius: 6px;
+    border-inline-start: 2px solid transparent; }
+  .rail a:hover { background: var(--accent-soft); text-decoration: none; }
+  .rail a.active { border-inline-start-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); }
+  .rail .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: .35rem; margin-block-start: .3rem; }
+  .rail .thumbs a { padding: 0; border: 1px solid var(--line); border-radius: 6px;
+    overflow: hidden; line-height: 0; }
+  .rail .thumbs a.active { outline: 2px solid var(--accent); }
+  .rail .thumbs img { width: 100%; height: auto; display: block; }
+
+  main { min-width: 0; }
+  section { margin-block-end: 2.6rem; }
+  h2.sec { font-size: 1.35rem; margin: 0 0 1rem; letter-spacing: -.01em; }
+
+  /* ---------- overview ---------- */
+  .tldr {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 1.1rem 1.3rem; font-size: 1.06rem;
+  }
+  .tldr strong.lbl { color: var(--accent); font-size: .78rem; text-transform: uppercase;
+    letter-spacing: .08em; display: block; margin-block-end: .35rem; }
+  .narrative p { max-width: 72ch; }
+  ul.points { padding-inline-start: 1.2rem; margin: .4rem 0; }
+  ul.points li { margin-block-end: .55rem; max-width: 75ch; }
+
+  .chip {
+    display: inline; background: var(--chip-bg); border: 1px solid var(--chip-line);
+    border-radius: 6px; padding: .06em .45em; font-size: .88em; color: inherit;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
+  a.chip:hover { text-decoration: none; border-color: var(--accent); }
+  .chip .play { color: var(--accent); font-size: .85em; }
+  .chip--warn { background: var(--warn-bg); border-color: var(--warn); }
+  .chip--warn .play { color: var(--warn); }
+
+  dl.glossary { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; max-width: 75ch; }
+  dl.glossary dt { font-weight: 650; }
+  dl.glossary dd { margin: 0; color: var(--muted); }
+
+  .chapters { display: flex; flex-direction: column; gap: .4rem; }
+  .chapter-row { display: flex; gap: .8rem; align-items: baseline; }
+  .chapter-row .t { font-variant-numeric: tabular-nums; color: var(--accent);
+    font-size: .85rem; min-width: 4.6em; }
+  .chapter-row .one { color: var(--muted); font-size: .92rem; }
+
+  /* ---------- slide cards ---------- */
+  .slide-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); padding: 1.2rem; margin-block-end: 1.6rem;
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 1.3rem;
+    scroll-margin-top: 5rem;
+  }
+  .slide-card figure { margin: 0; }
+  .slide-card img.shot {
+    width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line);
+    cursor: zoom-in; display: block;
+  }
+  .slide-card figcaption { font-size: .78rem; color: var(--muted); margin-block-start: .5rem;
+    display: flex; flex-wrap: wrap; gap: .6em; }
+  .slide-card h3 { margin: 0 0 .4rem; font-size: 1.12rem; letter-spacing: -.01em; }
+  .slide-card .shows { color: var(--muted); font-size: .93rem; margin: 0 0 .6rem; }
+  .slide-card .num { color: var(--muted); font-weight: 400; font-size: .8em; }
+  .sig { font-size: .92rem; margin: .6rem 0 0; }
+  .sig .lbl { color: var(--accent); font-weight: 650; }
+  .aside-note {
+    border-inline-start: 3px solid var(--accent); background: var(--accent-soft);
+    border-radius: 0 8px 8px 0; padding: .5rem .8rem; margin-block-start: .7rem;
+    font-size: .9rem;
+  }
+  [dir="rtl"] .aside-note { border-radius: 8px 0 0 8px; }
+  .aside-note .lbl { font-weight: 650; font-size: .78rem; display: block; color: var(--accent); }
+  details.tr { margin-block-start: .8rem; font-size: .88rem; }
+  details.tr summary { cursor: pointer; color: var(--muted); }
+  details.tr .lines { max-height: 320px; overflow-y: auto; margin-block-start: .5rem;
+    border-inline-start: 2px solid var(--line); padding-inline-start: .8rem; }
+  details.tr .lines p { margin: 0 0 .45rem; color: var(--muted); }
+  details.tr .lines .t { color: var(--accent); font-size: .78em;
+    font-variant-numeric: tabular-nums; }
+
+  .notice { background: var(--warn-bg); border: 1px solid var(--warn); color: inherit;
+    border-radius: 10px; padding: .7rem 1rem; }
+
+  footer { color: var(--muted); font-size: .82rem; border-block-start: 1px solid var(--line);
+    padding-block-start: 1rem; margin-block-start: 3rem; }
+
+  /* ---------- lightbox ---------- */
+  #lightbox { position: fixed; inset: 0; background: rgba(10,11,14,.88); z-index: 50;
+    display: none; align-items: center; justify-content: center; cursor: zoom-out; }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 94vw; max-height: 92vh; border-radius: 8px; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; gap: 1rem; }
+    .rail { position: static; max-height: none; border: 1px solid var(--line);
+      border-radius: 10px; padding: .6rem .8rem; background: var(--card); }
+    .slide-card { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- print ---------- */
+  @media print {
+    .topbar, .rail, .theme-btn, details.tr, #lightbox { display: none !important; }
+    body { background: #fff; color: #000; font-size: 11pt; }
+    .layout { display: block; max-width: none; padding: 0; }
+    .slide-card { break-inside: avoid; box-shadow: none; page-break-inside: avoid; }
+    a { color: inherit; }
+    .chip { border: 1px solid #bbb; background: #f5f0dc; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1><a href="{{ video.url }}" target="_blank" rel="noopener">{{ video.title }}</a></h1>
+    <span class="top-meta">{{ video.channel }} · <bdi>{{ video.duration_hms }}</bdi></span>
+    <span class="badge" title="{{ grounding }}{% if token_recall %} · {{ token_recall }}{% endif %}">✓ {{ grounding }}</span>
+    <button class="theme-btn" id="themeBtn" aria-label="{{ s.theme }}">◐</button>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="rail" id="rail">
+  <h2>{{ s.overview }}</h2>
+  <a href="#overview">{{ s.tldr }}</a>
+  <a href="#takeaways">{{ s.key_takeaways }}</a>
+  {% if chapters %}<a href="#chapters">{{ s.chapters }}</a>{% endif %}
+  {% if glossary %}<a href="#glossary">{{ s.glossary }}</a>{% endif %}
+  {% if slides %}
+  <h2>{{ s.slides }} ({{ slides|length }})</h2>
+  <div class="thumbs">
+    {% for sl in slides %}{% if sl.img %}
+    <a href="#{{ sl.id }}" title="{{ sl.heading }}" data-spy="{{ sl.id }}"><img src="{{ sl.img }}" alt="{{ sl.heading }}" loading="lazy"></a>
+    {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+</nav>
+
+<main>
+  {% if transcript_only %}<p class="notice">{{ s.transcript_only }}</p>{% endif %}
+
+  <section id="overview">
+    <div class="tldr"><strong class="lbl">{{ s.tldr }}</strong>{{ tldr }}</div>
+    <div class="narrative">
+      {% for p in narrative %}<p>{{ p }}</p>{% endfor %}
+    </div>
+  </section>
+
+  <section id="takeaways">
+    <h2 class="sec">{{ s.key_takeaways }}</h2>
+    <ul class="points">
+      {% for p in takeaways %}
+      <li>{{ p.text }}
+        {% if p.quote %}{% if p.url %} <a class="chip" href="{{ p.url }}" target="_blank" rel="noopener"><bdi>“{{ p.quote }}”</bdi> <span class="play">▶</span></a>
+        {% else %} <span class="chip chip--warn" title="{{ s.unverified }}"><bdi>“{{ p.quote }}”</bdi> <span class="play">⚠</span></span>{% endif %}{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if chapters %}
+  <section id="chapters">
+    <h2 class="sec">{{ s.chapters }}</h2>
+    <div class="chapters">
+      {% for c in chapters %}
+      <div class="chapter-row">
+        <span class="t">{% if c.url %}<a href="{{ c.url }}" target="_blank" rel="noopener"><bdi>{{ c.hms }}</bdi></a>{% elif c.hms %}<bdi>{{ c.hms }}</bdi>{% endif %}</span>
+        <span><strong>{{ c.title }}</strong> <span class="one">{{ c.one_liner }}</span></span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if glossary %}
+  <section id="glossary">
+    <h2 class="sec">{{ s.glossary }}</h2>
+    <dl class="glossary">
+      {% for g in glossary %}<dt><bdi>{{ g.term }}</bdi></dt><dd>{{ g.definition }}</dd>{% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  {% if numbers %}
+  <section id="numbers">
+    <h2 class="sec">{{ s.numbers_and_names }}</h2>
+    <ul class="points">
+      {% for p in numbers %}
+      <li>{{ p.text }}
+        {% if p.quote %}{% if p.url %} <a class="chip" href="{{ p.url }}" target="_blank" rel="noopener"><bdi>“{{ p.quote }}”</bdi> <span class="play">▶</span></a>
+        {% else %} <span class="chip chip--warn" title="{{ s.unverified }}"><bdi>“{{ p.quote }}”</bdi> <span class="play">⚠</span></span>{% endif %}{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if slides %}
+  <section id="slides">
+    <h2 class="sec">{{ s.slides }}</h2>
+    {% for sl in slides %}
+    <article class="slide-card" id="{{ sl.id }}" data-card>
+      <figure>
+        {% if sl.img %}<img class="shot" src="{{ sl.img }}" alt="{{ sl.heading }}" loading="lazy">{% endif %}
+        <figcaption>
+          <span>{{ s.on_screen }} <bdi>{{ sl.spans }}</bdi></span>
+          {% if sl.times_returned > 0 %}<span>{{ s.returned.format(n=sl.times_returned) }}</span>{% endif %}
+          <a href="{{ sl.watch_url }}" target="_blank" rel="noopener">{{ s.watch }} ▶</a>
+        </figcaption>
+      </figure>
+      <div>
+        <h3><span class="num">#{{ sl.index }}</span> {{ sl.heading }}</h3>
+        {% if sl.what_it_shows %}<p class="shows">{{ sl.what_it_shows }}</p>{% endif %}
+        <ul class="points">
+          {% for p in sl.points %}
+          <li>{{ p.text }}
+            {% if p.quote %}{% if p.url %} <a class="chip" href="{{ p.url }}" target="_blank" rel="noopener"><bdi>“{{ p.quote }}”</bdi> <span class="play">▶</span></a>
+            {% else %} <span class="chip chip--warn" title="{{ s.unverified }}"><bdi>“{{ p.quote }}”</bdi> <span class="play">⚠</span></span>{% endif %}{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% if sl.significance %}<p class="sig"><span class="lbl">{{ s.significance }}:</span> {{ sl.significance }}</p>{% endif %}
+        {% if sl.not_said_aloud %}
+        <div class="aside-note"><span class="lbl">{{ s.not_said_aloud }}</span>{{ sl.not_said_aloud }}</div>
+        {% endif %}
+        {% if sl.transcript %}
+        <details class="tr"><summary>≡ {{ s.transcript }}</summary>
+          <div class="lines">
+            {% for line in sl.transcript %}<p><span class="t"><bdi>[{{ line.t }}]</bdi></span> <bdi>{{ line.text }}</bdi></p>{% endfor %}
+          </div>
+        </details>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <footer>
+    <div>✓ {{ grounding }}{% if token_recall %} · {{ token_recall }}{% endif %}</div>
+    <div>{{ s.generated_by }} <a href="https://github.com/yosishe/talkbrief">talkbrief</a> v{{ version }} · {{ model_line }}</div>
+  </footer>
+</main>
+</div>
+
+<div id="lightbox" aria-hidden="true"><img alt=""></div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var saved = null;
+  try { saved = localStorage.getItem("tb-theme"); } catch (e) {}
+  if (saved) root.setAttribute("data-theme", saved);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    var cur = root.getAttribute("data-theme") || (dark ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("tb-theme", next); } catch (e) {}
+  });
+
+  var box = document.getElementById("lightbox");
+  var boxImg = box.querySelector("img");
+  document.querySelectorAll("img.shot").forEach(function (img) {
+    img.addEventListener("click", function () {
+      boxImg.src = img.src; box.classList.add("open");
+    });
+  });
+  box.addEventListener("click", function () { box.classList.remove("open"); boxImg.src = ""; });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { box.classList.remove("open"); }
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll("[data-card]"));
+    if (!cards.length || (e.key !== "j" && e.key !== "k")) return;
+    var y = window.scrollY + 90;
+    var idx = cards.findIndex(function (c) { return c.offsetTop > y + 5; });
+    var cur = idx === -1 ? cards.length - 1 : Math.max(0, idx - 1);
+    var next = e.key === "j" ? Math.min(cards.length - 1, cur + 1) : Math.max(0, cur - 1);
+    cards[next].scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  var links = {};
+  document.querySelectorAll('#rail a[href^="#"]').forEach(function (a) {
+    links[a.getAttribute("href").slice(1)] = a;
+  });
+  if ("IntersectionObserver" in window) {
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var link = links[en.target.id];
+        if (!link) return;
+        if (en.isIntersecting) {
+          document.querySelectorAll("#rail a.active").forEach(function (x) { x.classList.remove("active"); });
+          link.classList.add("active");
+        }
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("section[id], [data-card]").forEach(function (el) { spy.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
