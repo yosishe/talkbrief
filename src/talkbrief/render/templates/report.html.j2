@@ -48,6 +48,10 @@
   }
   th code { background: transparent; color: inherit; }
   bdi { unicode-bidi: isolate; }
+  /* pure-numeric runs (time ranges) carry NO strong character, so bdi's
+     first-strong heuristic falls back to the RTL paragraph direction and
+     reverses them — explicit LTR is the only correct isolation for numbers */
+  .num-ltr { direction: ltr; unicode-bidi: isolate; }
 
   /* ---------- top bar ---------- */
   .topbar {
@@ -146,6 +150,7 @@
   }
   .slide-card figcaption { font-size: .78rem; color: var(--muted); margin-block-start: .5rem;
     display: flex; flex-wrap: wrap; gap: .6em; }
+  .slide-card figcaption > * { margin-inline-end: .6em; }  /* weasyprint has no flex gap */
   .slide-card h3 { margin: 0 0 .4rem; font-size: 1.12rem; letter-spacing: -.01em; }
   .slide-card .shows { color: var(--muted); font-size: .93rem; margin: 0 0 .6rem; }
   .slide-card .num { color: var(--muted); font-weight: 400; font-size: .8em; }
@@ -201,7 +206,7 @@
 <header class="topbar">
   <div class="topbar-inner">
     <h1><a href="{{ video.url }}" target="_blank" rel="noopener">{{ video.title }}</a></h1>
-    <span class="top-meta">{{ video.channel }} · <bdi>{{ video.duration_hms }}</bdi></span>
+    <span class="top-meta">{{ video.channel }} · <span class="num-ltr">{{ video.duration_hms }}</span></span>
     <span class="badge" title="{{ grounding }}{% if token_recall %} · {{ token_recall }}{% endif %}">✓ {{ grounding }}</span>
     <button class="theme-btn" id="themeBtn" aria-label="{{ s.theme }}">◐</button>
   </div>
@@ -252,7 +257,7 @@
     <div class="chapters">
       {% for c in chapters %}
       <div class="chapter-row">
-        <span class="t">{% if c.url %}<a href="{{ c.url }}" target="_blank" rel="noopener"><bdi>{{ c.hms }}</bdi></a>{% elif c.hms %}<bdi>{{ c.hms }}</bdi>{% endif %}</span>
+        <span class="t">{% if c.url %}<a class="num-ltr" href="{{ c.url }}" target="_blank" rel="noopener">{{ c.hms }}</a>{% elif c.hms %}<span class="num-ltr">{{ c.hms }}</span>{% endif %}</span>
         <span><strong>{{ c.title }}</strong> <span class="one">{{ c.one_liner }}</span></span>
       </div>
       {% endfor %}
@@ -291,7 +296,7 @@
       <figure>
         {% if sl.img %}<img class="shot" src="{{ sl.img }}" alt="{{ sl.heading }}" loading="lazy">{% endif %}
         <figcaption>
-          <span>{{ s.on_screen }} <bdi>{{ sl.spans }}</bdi></span>
+          <span>{{ s.on_screen }} <span class="num-ltr">{{ sl.spans }}</span></span>
           {% if sl.times_returned > 0 %}<span>{{ s.returned.format(n=sl.times_returned) }}</span>{% endif %}
           <a href="{{ sl.watch_url }}" target="_blank" rel="noopener">{{ s.watch }} ▶</a>
         </figcaption>
@@ -314,7 +319,7 @@
         {% if sl.transcript %}
         <details class="tr"><summary>≡ {{ s.transcript }}</summary>
           <div class="lines">
-            {% for line in sl.transcript %}<p><span class="t"><bdi>[{{ line.t }}]</bdi></span> <bdi>{{ line.text }}</bdi></p>{% endfor %}
+            {% for line in sl.transcript %}<p><span class="t num-ltr">[{{ line.t }}]</span> <bdi>{{ line.text }}</bdi></p>{% endfor %}
           </div>
         </details>
         {% endif %}

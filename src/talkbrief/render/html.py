@@ -121,7 +121,12 @@ def render_report(rd: RunDir, meta: dict, cfg: RunConfig) -> Path:
     vid = video["id"]
 
     facts = {sd["id"]: sd for sd in slides_doc["slides"]}
-    srcs, embed_mode = _prepare_images(rd, slides_doc["slides"], cfg)
+    # only the slides the digest actually covers get rendered — and only those
+    # are worth re-encoding/embedding (a screencast can have hundreds of keyframes)
+    rendered_ids = {e["slide_id"] for e in verified["slides"]}
+    srcs, embed_mode = _prepare_images(
+        rd, [sd for sd in slides_doc["slides"] if sd["id"] in rendered_ids], cfg
+    )
 
     window_of: dict[str, dict] = {}
     for w in alignment["windows"]:
