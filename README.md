@@ -1,5 +1,8 @@
 # talkbrief
 
+[![CI](https://github.com/yosishe/talkbrief/actions/workflows/ci.yml/badge.svg)](https://github.com/yosishe/talkbrief/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Turn a YouTube talk into a grounded, slide-by-slide interactive brief.**
 
 `talkbrief` watches the talk so you can *read* it: it deterministically extracts the
@@ -8,14 +11,15 @@ notes and a whole-talk narrative — and then **mechanically verifies every quot
 against the transcript before you ever see it. The output is a beautiful,
 self-contained HTML report where every claim links to the exact second on YouTube.
 
-<!-- hero screenshot: docs/hero.png (generated from examples/report-sample.html) -->
-
 ```bash
-pip install talkbrief
-talkbrief doctor        # checks ffmpeg, yt-dlp, deno, and your Claude Code login
-talkbrief run https://www.youtube.com/watch?v=zjkBMFhNj_g
+git clone https://github.com/yosishe/talkbrief && cd talkbrief
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/talkbrief doctor    # checks ffmpeg, yt-dlp, deno, and your Claude Code login
+.venv/bin/talkbrief run https://www.youtube.com/watch?v=zjkBMFhNj_g
 open talkbrief-runs/*/report/report.html
 ```
+
+Not on PyPI yet — install from source as above. Python ≥ 3.11.
 
 No API key. `talkbrief` rides the **Claude Code CLI** you already have — if `claude`
 works in your terminal, `talkbrief` works too.
@@ -30,7 +34,7 @@ One self-contained `report.html` (opens offline, light/dark, keyboard `j`/`k`):
   `youtu.be/…?t=<exact second>`), why it matters, and **"on the slide, not said
   aloud"** — the information you'd miss by only reading a transcript.
 - **Chapters, glossary, key numbers & names** — all quote-anchored.
-- **A grounding badge** — e.g. *"39/41 quotes verified against the transcript"*.
+- **A grounding badge** — e.g. *"39/41 quotes verified against the transcript"* (illustrative).
   Unverified quotes are flagged in amber, never silently dropped.
 
 Plus `--pdf` export, `batch` mode for a file of URLs, `--lang he` for a fully
@@ -104,6 +108,20 @@ prior pipeline this tool's lessons come from):
   single call's output ceiling is real however large the context window is.
 - **Caption provenance is recorded** (`manual` / `auto` / `asr`) — a manual track
   and an auto track are different artifacts and are never treated as equals.
+
+## Measured vs. estimated
+
+Every number in this README carries one of two labels. `[measured]` means the figure comes
+from a run or a test you can re-execute; `[estimated]` means it was derived, not observed.
+
+| figure | label | where it comes from |
+|---|---|---|
+| 55 tests, no network, no LLM | `[measured]` | this repository's CI, every push |
+| Union detector recall 84.6% → 92.3% | `[measured]` | a hand-built gold set in the earlier, private pipeline this tool's lessons come from; the gold set is **not** in this repository |
+| Text-rich slides ~24× cheaper as OCR text than as images | `[estimated]` | token count of a typical slide's OCR text vs. one 512 px image attachment |
+| 351/354 quotes grounded on a 60-minute real-model run | `[measured]` | one run on the maintainer's machine, 2026-08; the report artefacts are not yet committed to this repository |
+
+Anything not in this table is a design statement, not a measurement.
 
 ## Hebrew mode
 
