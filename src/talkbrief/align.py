@@ -37,7 +37,8 @@ def _split_points(segments: list[dict], lo: float, hi: float, parts: int) -> lis
     acc, next_cut = 0, total / parts
     for s in inside:
         acc += len(s["text"].split())
-        if acc >= next_cut and len(cuts) < parts - 1:
+        previous = cuts[-1] if cuts else lo
+        if acc >= next_cut and len(cuts) < parts - 1 and previous < s["end"] < hi:
             cuts.append(s["end"])
             next_cut += total / parts
     return cuts
@@ -87,7 +88,7 @@ def build_windows(
             cuts = _split_points(segments, lo, hi, math.ceil(words / target_words))
             edges = [lo, *cuts, hi]
             for j in range(len(edges) - 1):
-                part_title = f"{title} ({j + 1})" if title else None
+                part_title = f"{title} ({j + 1})" if title and cuts else title
                 final.append((edges[j], edges[j + 1], part_title))
         else:
             final.append((lo, hi, title))

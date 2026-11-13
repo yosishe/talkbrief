@@ -64,7 +64,7 @@ class RunConfig:
                 "asr_model": self.asr_model,
                 "caption_langs": list(self.caption_langs),
             },
-            "align": {"target_window_words": self.target_window_words},
+            "align": {"target_window_words": self.target_window_words, "split_version": 2},
             "synthesize": {
                 "lang": self.lang,
                 "model": self.model,
