@@ -38,6 +38,17 @@ def test_oversized_chapter_is_split():
     assert all(w["word_count"] <= 1.7 * 300 for w in huge_parts)
 
 
+def test_long_caption_cannot_create_a_backwards_or_empty_window():
+    chapters = [
+        {"title": "Start", "start_s": 0.0, "end_s": 10.0},
+        {"title": "Rest", "start_s": 10.0, "end_s": 20.0},
+    ]
+    for end in (10.0, 12.0):
+        segments = [{"start": 0.0, "end": end, "text": "word " * 30}]
+        windows = build_windows(segments, chapters, 20.0, target_words=10)
+        assert [(w["start_s"], w["end_s"]) for w in windows] == [(0, 10), (10, 20)]
+
+
 def test_windows_time_fallback_without_transcript():
     windows = build_windows([], [], 900.0, target_words=2200)
     assert len(windows) == 3
